@@ -64,14 +64,15 @@ Dados brutos (train / validation / test)
 
 ```
 .
-├── modelo_renda.ipynb    # Notebook principal — 28 células documentadas
-├── train.csv             # 70% — treino do modelo
-├── validation.csv        # 15% — tuning e avaliação
-├── test.csv              # 15% — avaliação final apenas (não usar para tuning)
-├── desafio.pdf           # Especificação original do problema
-├── CLAUDE.md             # Instruções do projeto para Claude Code
-├── fig_*.png             # Gráficos gerados ao executar o notebook
-└── README.md             # Este arquivo
+├── modelo_renda.ipynb              # Notebook principal — 28 células documentadas
+├── train.csv                       # 70% — treino do modelo
+├── validation.csv                  # 15% — tuning e avaliação
+├── test.csv                        # 15% — avaliação final apenas
+├── desafio.pdf                     # Especificação original do problema
+├── CLAUDE.md                       # Instruções do projeto para Claude Code
+├── skills/
+│   └── ml-classificacao-renda.md  # Skill do Claude Code (instalável)
+└── README.md                       # Este arquivo
 ```
 
 ---
@@ -151,6 +152,29 @@ jupyter lab modelo_renda.ipynb
 ```
 
 A primeira célula instala automaticamente todas as dependências (`shap`, `lightgbm`, `xgboost`) via `%pip install` — basta executar em ordem.
+
+---
+
+## Skill para Claude Code
+
+Este projeto inclui uma skill para o [Claude Code](https://claude.ai/code) que permite ao assistente trabalhar neste projeto com contexto completo — regras de leakage, mapa de células, como adicionar modelos e atualizar documentação.
+
+### Instalar a skill
+
+**Windows (PowerShell)**
+```powershell
+$dest = "$env:USERPROFILE\.claude\Skills\ml-classificacao-renda"
+New-Item -ItemType Directory -Force -Path $dest
+Copy-Item "skills\ml-classificacao-renda.md" "$dest\SKILL.md"
+```
+
+**macOS / Linux**
+```bash
+mkdir -p ~/.claude/Skills/ml-classificacao-renda
+cp skills/ml-classificacao-renda.md ~/.claude/Skills/ml-classificacao-renda/SKILL.md
+```
+
+Após instalar, a skill fica disponível no Claude Code como `/ml-classificacao-renda`.
 
 ---
 
