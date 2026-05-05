@@ -1,17 +1,62 @@
 # Classificação de Renda — Adult Income Dataset
-### Portfólio | Machine Learning
+
+### Portfólio de Machine Learning | Cláudio Ferreira Neves
+
+![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python&logoColor=white)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-1.x-orange?logo=scikit-learn&logoColor=white)
+![SHAP](https://img.shields.io/badge/XAI-SHAP-red)
+![Métrica](https://img.shields.io/badge/Métrica%20Principal-F1%20Score-green)
+![Status](https://img.shields.io/badge/Status-Concluído-brightgreen)
 
 ---
 
 ## Sobre o projeto
 
-Este projeto resolve um problema clássico de **classificação binária**: prever se uma pessoa ganha mais ou menos de 50 mil dólares por ano, usando dados socioeconômicos do Census Bureau americano.
+Projeto de classificação binária para prever se uma pessoa ganha mais ou menos de 50 mil dólares por ano, usando dados socioeconômicos do Census Bureau americano (Adult Income Dataset).
 
-Faz parte do meu portfólio de Machine Learning, construído para consolidar competências aplicadas ao mercado de trabalho. O código também é usado em sala de aula como material de referência para demonstrar um pipeline completo e bem estruturado.
+Faz parte do portfólio de Machine Learning construído como **softskill para o mercado de trabalho**. O código é estruturado com didática e documentação detalhada, sendo usado também como material de referência em sala de aula.
 
-**Métrica principal:** F1 Score  
-**Dataset:** Adult Income (45.225 instâncias, 15 atributos)  
-**Modelo final:** Gradient Boosting com RandomizedSearchCV
+| | |
+|---|---|
+| **Problema** | Classificação binária (<=50K / >50K) |
+| **Dataset** | Adult Income — 45.225 instâncias, 15 atributos |
+| **Métrica principal** | F1 Score |
+| **Modelo final** | Gradient Boosting + RandomizedSearchCV |
+| **XAI** | SHAP (global + local) |
+
+---
+
+## Pipeline
+
+```
+Dados brutos (train / validation / test)
+        │
+        ▼
+   EDA ─────────── distribuições, correlações, desbalanceamento
+        │
+        ▼
+   Pré-processamento
+        ├── NANs     → imputação pela moda (calculada no treino)
+        └── Outliers → capping pelo método IQR
+        │
+        ▼
+   Feature Engineering
+        ├── Label Encoding   → categorias para inteiros
+        ├── StandardScaler   → z-score (média=0, desvio=1)
+        └── SelectKBest      → top 12 features por Informação Mútua
+        │
+        ▼
+   Modelagem ────── Logistic Regression → Decision Tree → Random Forest → Gradient Boosting
+        │
+        ▼
+   Tuning ────────── RandomizedSearchCV (5-fold CV, 40 iterações, scoring=F1)
+        │
+        ▼
+   XAI ────────────── SHAP: importância global + beeswarm + waterfall local
+        │
+        ▼
+   Avaliação final ── test.csv (usado UMA única vez)
+```
 
 ---
 
@@ -19,13 +64,14 @@ Faz parte do meu portfólio de Machine Learning, construído para consolidar com
 
 ```
 .
-├── modelo_renda.ipynb       # Notebook principal — pipeline completo
-├── train.csv                # 70% dos dados — treino do modelo
-├── validation.csv           # 15% dos dados — tuning e avaliação
-├── test.csv                 # 15% dos dados — avaliação final apenas
-├── desafio.pdf              # Especificação da atividade (SENAI)
-├── fig_*.png                # Gráficos gerados pelo notebook
-└── README.md                # Este arquivo
+├── modelo_renda.ipynb    # Notebook principal — 28 células documentadas
+├── train.csv             # 70% — treino do modelo
+├── validation.csv        # 15% — tuning e avaliação
+├── test.csv              # 15% — avaliação final apenas (não usar para tuning)
+├── desafio.pdf           # Especificação original do problema
+├── CLAUDE.md             # Instruções do projeto para Claude Code
+├── fig_*.png             # Gráficos gerados ao executar o notebook
+└── README.md             # Este arquivo
 ```
 
 ---
@@ -35,10 +81,10 @@ Faz parte do meu portfólio de Machine Learning, construído para consolidar com
 | Atributo | Tipo | Descrição |
 |----------|------|-----------|
 | age | Numérico | Idade da pessoa |
-| workclass | Categórico | Tipo de empregador (Private, Gov, etc.) |
-| fnlwgt | Numérico | Peso amostral do Census |
+| workclass | Categórico | Tipo de empregador (Private, Gov, Self-emp...) |
+| fnlwgt | Numérico | Peso amostral do Census Bureau |
 | education | Categórico | Nível de escolaridade |
-| educational-num | Numérico | Anos de estudo (versão numérica) |
+| educational-num | Numérico | Anos de escolaridade (versão numérica) |
 | marital-status | Categórico | Estado civil |
 | occupation | Categórico | Ocupação profissional |
 | relationship | Categórico | Papel na família |
@@ -50,131 +96,89 @@ Faz parte do meu portfólio de Machine Learning, construído para consolidar com
 | native-country | Categórico | País de origem |
 | **income** | **Target** | **<=50K ou >50K** |
 
-Valores ausentes no original estão representados como `?` — tratados no notebook.
+Valores ausentes estão codificados como `?` nos CSVs originais — tratados na célula de imputação.
 
 ---
 
-## Metodologia
+## Por que F1 Score e não acurácia?
 
-### Por que F1 Score e não acurácia?
-
-O dataset tem **~75% dos casos com renda <=50K**. Um modelo que prevê "<=50K" para todo mundo teria 75% de acurácia sem aprender nada. O F1 Score penaliza esse comportamento porque equilibra precisão (quando diz >50K, está certo?) e recall (quantos dos >50K ele captura?).
+O dataset tem ~75% dos casos com renda `<=50K`. Um modelo que chuta "<=50K" para todos teria 75% de acurácia sem aprender absolutamente nada. O F1 Score equilibra precisão e recall, penalizando exatamente esse comportamento.
 
 ```
 F1 = 2 × (Precisão × Recall) / (Precisão + Recall)
-```
 
-### Pipeline completo
-
-```
-Dados brutos
-    │
-    ▼
-EDA — entender distribuições, correlações, desbalanceamento
-    │
-    ▼
-Pré-processamento
-    ├── NANs: imputação pela moda (calculada no treino)
-    └── Outliers: capping pelo método IQR
-    │
-    ▼
-Feature Engineering
-    ├── Label Encoding para variáveis categóricas
-    ├── StandardScaler (z-score) para numéricas
-    └── SelectKBest — Informação Mútua (top 12 features)
-    │
-    ▼
-Modelagem — comparação de algoritmos
-    ├── Regressão Logística (baseline)
-    ├── Árvore de Decisão
-    ├── Random Forest
-    └── Gradient Boosting ← melhor
-    │
-    ▼
-Tuning — RandomizedSearchCV (5-fold CV, 40 iterações)
-    │
-    ▼
-XAI — SHAP Values (global + local)
-    │
-    ▼
-Avaliação final no test.csv (usado UMA VEZ)
+Precisão = TP / (TP + FP)  →  dos que previ >50K, quantos realmente eram?
+Recall   = TP / (TP + FN)  →  dos que eram >50K, quantos o modelo encontrou?
 ```
 
 ---
 
-## Evolução do projeto (tabela de tuning)
+## Evolução do tuning
 
-| Etapa | Configuração principal | F1 Score (val) |
-|-------|----------------------|----------------|
-| 1 — Regressão Logística (baseline) | max_iter=500 | ~0.67 |
-| 2 — Gradient Boosting padrão | n_estimators=100, lr=0.1 | ~0.73 |
-| 3 — GB + Feature Selection | Top 12 features por MI | ~0.73 |
-| 4 — **GB + RandomizedSearchCV** | Melhores hiperparâmetros | **~0.76+** |
+| # | Etapa | Configuração | F1 (val) |
+|---|-------|-------------|----------|
+| 1 | Regressão Logística (baseline) | max_iter=500, padrão | ~0.67 |
+| 2 | Gradient Boosting padrão | n_estimators=100, lr=0.1 | ~0.73 |
+| 3 | GB + Feature Selection | top 12 features (MI) | ~0.73 |
+| 4 | **GB + RandomizedSearchCV** | melhores hiperparâmetros | **~0.76+** |
 
-*Valores exatos gerados ao executar o notebook.*
-
----
-
-## Resultados finais (test set)
-
-| Métrica | Resultado |
-|---------|-----------|
-| Accuracy | ver notebook |
-| Precision | ver notebook |
-| Recall | ver notebook |
-| **F1 Score** | **ver notebook** |
-| AUC-ROC | ver notebook |
-
-*Execute o notebook para ver os valores precisos — eles variam conforme o ambiente.*
+*Execute o notebook para ver os valores exatos do seu ambiente.*
 
 ---
 
 ## Explicabilidade com SHAP
 
-O projeto usa **SHAP (SHapley Additive exPlanations)** para responder:
+O projeto usa três visualizações SHAP:
 
-- Quais features mais influenciam as previsões? (gráfico de importância global)
-- Como cada feature empurra a previsão para >50K ou <=50K? (beeswarm plot)
-- Por que o modelo previu X para *esta* pessoa específica? (waterfall plot)
-
-Isso é fundamental em projetos reais — um modelo que ninguém consegue explicar raramente é aprovado para uso.
+| Gráfico | O que mostra |
+|---------|-------------|
+| Importância global | Features mais influentes em média em todo o dataset |
+| Beeswarm | Como cada feature empurra a previsão para >50K ou <=50K, por observação |
+| Waterfall | Explicação individual: por que o modelo decidiu X para uma pessoa específica |
 
 ---
 
 ## Como executar
 
-### Pré-requisitos
-
 ```bash
-pip install pandas numpy matplotlib seaborn scikit-learn shap
+# 1. Clone o repositório
+git clone https://github.com/cfneves/machine_learning_02.git
+cd machine_learning_02
+
+# 2. Abra o notebook
+jupyter lab modelo_renda.ipynb
+# ou no VS Code: abra o arquivo diretamente
 ```
 
-### Execução
-
-1. Clone o repositório
-2. Abra `modelo_renda.ipynb` no Jupyter Lab, Jupyter Notebook ou VS Code
-3. Execute as células em ordem (Kernel → Run All)
-4. Os gráficos são salvos automaticamente como `fig_*.png`
+A primeira célula instala automaticamente todas as dependências (`shap`, `lightgbm`, `xgboost`) via `%pip install` — basta executar em ordem.
 
 ---
 
-## Conceitos-chave para estudar após este projeto
+## Conceitos abordados no notebook
+
+**Estatística e dados**
+- Distribuições, assimetria e detecção visual de outliers
+- Correlação de Pearson vs Informação Mútua
+- Desbalanceamento de classes e suas implicações
 
 **Pré-processamento**
-- Por que a moda/mediana do treino — e não do dataset completo — deve ser usada na imputação?
-- O que acontece se você aplicar o StandardScaler nos dados de teste separadamente?
+- Data leakage: por que fit só no treino
+- Capping IQR vs remoção de outliers
+- Label Encoding vs One-Hot Encoding
 
 **Modelagem**
-- Qual a diferença entre Random Forest e Gradient Boosting?
-- O que é overfitting e como a validação cruzada ajuda a detectá-lo?
+- Bias-variance tradeoff
+- Ensemble: bagging (Random Forest) vs boosting (Gradient Boosting)
+- Hiperparâmetros: o que cada um controla
 
-**Métricas**
-- Em que cenários Recall é mais importante que Precisão (e vice-versa)?
-- AUC-ROC de 0.5 significa o quê?
+**Avaliação**
+- Precisão, Recall, F1, AUC-ROC — quando usar cada um
+- Como ler uma matriz de confusão
+- Por que o test set é sagrado
 
 **XAI**
-- Por que SHAP é superior à importância de features nativa do sklearn?
-- O que acontece quando duas features altamente correlacionadas estão no modelo?
+- SHAP values: fundamento em teoria dos jogos
+- Explicações globais vs locais
 
 ---
 
@@ -185,6 +189,7 @@ pip install pandas numpy matplotlib seaborn scikit-learn shap
 - [Scikit-learn User Guide](https://scikit-learn.org/stable/user_guide.html)
 - Breiman, L. (2001). Random Forests. *Machine Learning*, 45(1), 5-32.
 - Friedman, J. H. (2001). Greedy function approximation: a gradient boosting machine. *Annals of Statistics*, 29(5), 1189-1232.
+- Lundberg, S. & Lee, S. (2017). A Unified Approach to Interpreting Model Predictions. *NeurIPS*.
 
 ---
 
@@ -192,4 +197,6 @@ pip install pandas numpy matplotlib seaborn scikit-learn shap
 
 **Cláudio Ferreira Neves**
 
-Projeto desenvolvido como parte do portfólio de Machine Learning — construído como softskill para o mercado de trabalho e publicado no GitHub.
+Portfólio de Machine Learning — construído como softskill para o mercado de trabalho.
+
+[![GitHub](https://img.shields.io/badge/GitHub-cfneves-181717?logo=github)](https://github.com/cfneves)

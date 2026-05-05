@@ -1,0 +1,13 @@
+# Gráficos gerados pelo notebook (reproduced on execution)
+fig_*.png
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Claude Code project settings (local only)
+.claude/
