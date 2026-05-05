@@ -190,5 +190,6 @@ pip install pandas numpy matplotlib seaborn scikit-learn shap
 
 ## Autor
 
-Projeto desenvolvido para portfólio profissional e publicado no GitHub.  
-Utilizado como material de referência em aulas de Machine Learning.
+**Cláudio Ferreira Neves**
+
+Projeto desenvolvido como parte do portfólio de Machine Learning — construído como softskill para o mercado de trabalho e publicado no GitHub.
