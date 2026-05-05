@@ -1,5 +1,5 @@
 # Classificação de Renda — Adult Income Dataset
-### Atividade Prática | SENAI | Machine Learning
+### Portfólio | Machine Learning
 
 ---
 
@@ -7,7 +7,7 @@
 
 Este projeto resolve um problema clássico de **classificação binária**: prever se uma pessoa ganha mais ou menos de 50 mil dólares por ano, usando dados socioeconômicos do Census Bureau americano.
 
-O objetivo não é apenas chegar a um resultado — é aprender o raciocínio por trás de cada decisão, desde o dado bruto até o modelo em produção.
+Faz parte do meu portfólio de Machine Learning, construído para consolidar competências aplicadas ao mercado de trabalho. O código também é usado em sala de aula como material de referência para demonstrar um pipeline completo e bem estruturado.
 
 **Métrica principal:** F1 Score  
 **Dataset:** Adult Income (45.225 instâncias, 15 atributos)  
@@ -190,6 +190,5 @@ pip install pandas numpy matplotlib seaborn scikit-learn shap
 
 ## Autor
 
-Desenvolvido como atividade prática do curso de Machine Learning — SENAI.
-
-Projeto publicado no GitHub como portfólio acadêmico.
+Projeto desenvolvido para portfólio profissional e publicado no GitHub.  
+Utilizado como material de referência em aulas de Machine Learning.
